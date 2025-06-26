@@ -43,7 +43,7 @@ jobs:
       - name: Deploy each Glue Job
         run: |
           declare -A jobs=(
-            ["wistia_api_pipe_line.py"]="wistia_api_pipe_line.py"
+            ["wistia_api_pipeline"]="wistia_api_pipeline.py"
           )
 
           for job_name in "${!jobs[@]}"; do
