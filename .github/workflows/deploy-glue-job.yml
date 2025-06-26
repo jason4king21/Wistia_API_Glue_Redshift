@@ -36,7 +36,7 @@ jobs:
 
       - name: Upload Glue scripts to S3
         run: |
-          for script in cdc_metrics_job_bronze.py cdc_metrics_job_silver.py cdc_metrics_job_gold.py; do
+          for script in wistia_api_pipeline.py; do
             aws s3 cp scripts/$script s3://${{ env.S3_BUCKET }}/scripts/$script
           done
 
