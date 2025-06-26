@@ -1,8 +1,8 @@
 name: Deploy AWS Glue Jobs
-  run: |
-    set -x
-    aws glue get-job --job-name "$job_name"
-    ...
+run: |
+  set -x
+  aws glue get-job --job-name "$job_name"
+  ...
     
 on:
   push:
