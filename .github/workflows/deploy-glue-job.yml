@@ -1,8 +1,5 @@
 name: Deploy AWS Glue Jobs
-run: |
-  set -x
-  aws glue get-job --job-name "$job_name"
-  ...
+
     
 on:
   push:
@@ -24,6 +21,11 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
+
+      - name: Debug deploy step
+        run: |
+          set -x
+          aws glue get-job --job-name "$job_name"  
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
