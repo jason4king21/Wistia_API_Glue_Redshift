@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
       GLUE_ROLE_ARN: ${{ secrets.GLUE_ROLE_ARN }}
       S3_BUCKET: ${{ secrets.S3_BUCKET }}
 
@@ -36,9 +37,7 @@ jobs:
       - name: Deploy each Glue Job
         run: |
           declare -A jobs=(
-            ["cdc_metrics_job_bronze"]="cdc_metrics_job_bronze.py"
-            ["cdc_metrics_job_silver"]="cdc_metrics_job_silver.py"
-            ["cdc_metrics_job_gold"]="cdc_metrics_job_gold.py"
+            ["wistia_api_pipe_line.py"]="wistia_api_pipe_line.py"
           )
 
           for job_name in "${!jobs[@]}"; do
