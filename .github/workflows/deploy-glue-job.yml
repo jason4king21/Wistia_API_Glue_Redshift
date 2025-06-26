@@ -1,0 +1,68 @@
+name: Deploy AWS Glue Jobs
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'scripts/**'
+      - 'glue_jobs/**'
+      - '.github/workflows/deploy-glue-job.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      GLUE_ROLE_ARN: ${{ secrets.GLUE_ROLE_ARN }}
+      S3_BUCKET: ${{ secrets.S3_BUCKET }}
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload Glue scripts to S3
+        run: |
+          for script in cdc_metrics_job_bronze.py cdc_metrics_job_silver.py cdc_metrics_job_gold.py; do
+            aws s3 cp scripts/$script s3://${{ env.S3_BUCKET }}/scripts/$script
+          done
+
+      - name: Deploy each Glue Job
+        run: |
+          declare -A jobs=(
+            ["cdc_metrics_job_bronze"]="cdc_metrics_job_bronze.py"
+            ["cdc_metrics_job_silver"]="cdc_metrics_job_silver.py"
+            ["cdc_metrics_job_gold"]="cdc_metrics_job_gold.py"
+          )
+
+          for job_name in "${!jobs[@]}"; do
+            script_name=${jobs[$job_name]}
+            script_path="s3://${{ env.S3_BUCKET }}/scripts/$script_name"
+            temp_dir="s3://${{ env.S3_BUCKET }}/glue/temp/"
+
+            jq \
+              --arg script "$script_path" \
+              --arg role "$GLUE_ROLE_ARN" \
+              --arg temp "$temp_dir" \
+              '.Command.ScriptLocation = $script
+              | .Role = $role
+              | .DefaultArguments["--TempDir"] = $temp' \
+              glue_jobs/glue_job_config.json > job_config_final.json
+
+            if aws glue get-job --job-name "$job_name" > /dev/null 2>&1; then
+              echo "Updating existing Glue job: $job_name"
+              aws glue update-job --job-name "$job_name" --job-update file://job_config_final.json
+            else
+              echo "Creating new Glue job: $job_name"
+              aws glue create-job --name "$job_name" --cli-input-json file://job_config_final.json
+            fi
+          done
+
+      - name: ✅ Done
+        run: echo "All Glue jobs deployed successfully"
