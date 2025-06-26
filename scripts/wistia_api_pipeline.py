@@ -1,15 +1,15 @@
-import os
 import json
 import boto3
 import pandas as pd
 import requests
 from datetime import datetime
-from google.colab import userdata
 import pyarrow.json as paj
 import pyarrow as pa, pyarrow.parquet as pq
 from datetime import datetime, timedelta
 import re
 from dateutil.relativedelta import relativedelta
+import sys
+from awsglue.utils import getResolvedOptions
 
 # --- Config --
 API_TOKEN = "0323ade64e13f79821bdc0f2a9410d9ec3873aa9df01f8a4a54d4e0f3dd2e6b4"
@@ -22,8 +22,6 @@ S3_PREFIX_EVENTS = "data/fact_events/"
 S3_PREFIX_GRAPH = "data/fact_engagement_graph/"
 S3_PREFIX_VISITORS = "data/dim_visitors/"
 
-os.environ["AWS_ACCESS_KEY_ID"] = userdata.get('AWSKey')
-os.environ["AWS_SECRET_ACCESS_KEY"] = userdata.get('AWSSecret')
 
 # --- AWS Clients ---
 s3 = boto3.client("s3")
