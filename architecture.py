@@ -36,7 +36,7 @@ with Diagram(
         ]
 
     # Downstream Consumption
-    redshift_dw = Redshift("Redshift (Analytics)")
+    redshift_dw = Redshift("Redshift (Data Warehouse & Analytics)")
     
 
     # Flow
