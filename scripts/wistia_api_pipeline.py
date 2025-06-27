@@ -10,6 +10,12 @@ import re
 from dateutil.relativedelta import relativedelta
 import sys
 from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+
+sys.argv += ["--JOB_NAME=local-test"]
+args = getResolvedOptions(sys.argv, ["JOB_NAME"])
 
 # --- Config --
 API_TOKEN = "0323ade64e13f79821bdc0f2a9410d9ec3873aa9df01f8a4a54d4e0f3dd2e6b4"
@@ -117,12 +123,19 @@ def month_ranges(n_months=24):
 
 # --- Main Logic ---
 def main():
+    args = getResolvedOptions(sys.argv, ["JOB_NAME"])
+    sc = SparkContext.getOrCreate()
+    glueContext = GlueContext(sc)
+    job = Job(glueContext)
+    
+    job.init(args["JOB_NAME"], args)
+    
     today = datetime.now().date()
     media = []
     engagements = []
     graph = []
 
-
+    print("Start")
     for media_id in MEDIA_IDS:
         media_results = fetch_media(media_id)
         media.append(media_results)
@@ -228,6 +241,8 @@ def main():
     graph_df.to_parquet(f"/tmp/{key.split('/')[-1]}", index=False)
     s3.upload_file(f"/tmp/{key.split('/')[-1]}", S3_BUCKET, key)
     print(f"✅ Uploaded graph data to s3://{S3_BUCKET}/{key}")
+    
+    job.commit()
 
-if __name__ == "__main__":
-    main()
+
+main()
