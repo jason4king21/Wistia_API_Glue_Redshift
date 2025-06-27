@@ -181,7 +181,7 @@ Once the data is cataloged in Glue and accessible via Redshift, you can:
 ```bash
 .
 ├── scripts/                      # Glue job scripts
-│   └── wistia_glue_job.py
+│   └── wistia_api_pipeline.py
 ├── diagrams/
 │   └── architecture.png
 ├── .github/
