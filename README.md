@@ -32,7 +32,7 @@ This project implements a full-stack data engineering pipeline that automates th
 
 ## 🧩 Architecture Overview
 
-![Architecture Diagram](diagrams/architecture2.png)
+![Architecture Diagram](diagrams/architecture.png)
 
 ---
 
